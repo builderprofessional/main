@@ -31,7 +31,7 @@ module.exports = function (grunt) {
         options: {
           // Specifies directories to scan for @import directives when parsing.
           // Default value is the directory of the source, which is probably what you want.
-          paths: ["less","node_modules/bootstrap/less"],
+          paths: ["less","bower_components/bootstrap/less"],
         },
         files: {
           // compilation.css  :  source.less
