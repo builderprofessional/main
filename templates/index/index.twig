@@ -10,6 +10,7 @@
 
       {% include 'index/productCallout.twig' with {
         'productClass': 'artisanal',
+        'href': '/artisanal.php',
         'imageContent': imageContent,
         'largeTitle': 'We Build',
         'smallTitle': 'Your Dream Website',
@@ -22,6 +23,8 @@
 
       {% include 'index/productCallout.twig' with {
         'productClass': 'software',
+        'href': 'http://www.builders-software.com/',
+        'target': '_blank',
         'imageContent': imageContent,
         'largeTitle': 'Easy Estimating',
         'smallTitle': 'With Great Software',
@@ -34,6 +37,8 @@
 
       {% include 'index/productCallout.twig' with {
         'productClass': 'training',
+        'href': 'http://www.teambse.com/training.php',
+        'target': '_blank',
         'imageContent': imageContent,
         'largeTitle': 'Comprehensive',
         'smallTitle': 'Training for Builders',
@@ -46,6 +51,8 @@
 
       {% include 'index/productCallout.twig' with {
         'productClass': 'photos',
+        'href': 'http://www.teambse.com/avservices.php',
+        'target': '_blank',
         'imageContent': imageContent,
         'largeTitle': 'Professional',
         'smallTitle': 'Photography Services',
@@ -61,31 +68,11 @@
           all for a minimal set-up and a low monthly fee? Our team puts the builder first and works hard to provide the best
           websites, software, and training in the industry.</p>
 
-        <div class="consultAction">
-          <a href="#">Get Started with a Free Consultation</a>
-        </div>
+        {% include 'widgets/inlineContact.twig' %}
       </div>
     </div>
 
-    <div class="row">
-      <div class="container featuredArtisanalSites">
-        <h3>Featured Artisanal Sites</h3>
-
-        <div class="row">
-          <div class="container washableContainer">
-            <div class="featuredSite washable">
-              <a href="#"><img src="images/index/featured_eliteirondoors.jpg" /></a>
-            </div>
-            <div class="featuredSite washable">
-              <a href="#"><img src="images/index/featured_arlingtonpavers.jpg" /></a>
-            </div>
-            <div class="featuredSite washable">
-              <a href="#"><img src="images/index/featured_ichroofing.jpg" /></a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    {% include 'artisanal/featured.twig' %}
 
   </div>
 {% endblock %}

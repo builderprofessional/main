@@ -17,7 +17,7 @@
     <script type="text/javascript" src="bower_components/bootstrap/dist/js/npm.js"></script>
 </head>
 
-<body>
+<body class="{% if extra.product is defined %}product-{{ extra.product }}{% else %}product-none{% endif %}">
     {% include 'header.twig' %}
     {% block mainContent %}{% endblock %}
     {% include 'footer.twig' %}

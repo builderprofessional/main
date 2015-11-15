@@ -1,0 +1,68 @@
+{% extends 'base.twig' %}
+
+{% block mainContent %}
+  <div class="container">
+    <div class="row pageHeader">
+      <h2>Discover the Higher Standard in Websites</h2>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="container">
+      <div class="overview">
+        <p>At Builder Professional, we know what a website means to you and your business. Your
+          website projects your work to the public, markets your brand, and showcases your craftsmanship. Those
+          are all important, but many times your website will also be your first impression, the one you can
+          never take back.</p>
+
+        <p>A Builder Professional Artisanal Site is designed specifically for your business to
+          ensure that every first impression is the lasting impression that turns every potential customer into
+          a convert. Instead of a website that you have to manage on your own, the Artisanal Site is a
+          relationship that puts our expertise to work for you on a continuing basis.</p>
+
+        <p>First, you pay a minimal setup fee of $500 for your whole website. There are no add-on
+          prices for additional modules or pages. All required programming and pages are included. Once your initial
+          graphics are completed, you pay $150 per month as long as you want to stay with us. We're betting
+          you're going to stay with us a very long time.</p>
+
+        <p>When you build a new home and want to show off your latest and greatest, just get
+          us the photos. We'll get them sized, oriented, and beautifully placed into your site. When you have
+          a great customer testimonial, just get it to us, we'll get it featured to show off the great work
+          you are doing. When you forge a great new partnership, just let us know the details and we'll get
+          a write up and links to make the most out of your relationships. And we do all this making sure that
+          your website never looks out of date, never looks rushed, and never looks anything but first class.
+          Plus, all of this is 100% included in your fee, you are never up-sold or charged extra. For your
+          Artisanal Site, nothing but the best is good enough for you, and nothing but the best is good
+          enough for us either.</p>
+
+        <p>I believe your business deserves an Artisanal Site that projects what you and your
+          business are capable of, and I can't wait to make sure your business gets one.</p>
+
+        <p class="ceo_signature" style="padding-left: 40px">-- Tony Vance, CEO Builder Professional</p>
+      </div>
+
+      <div class="featureList">
+        <div class="price_container">
+          <div class="price_box">
+            <div class="title">Features</div>
+            <ul>
+              <li>Web and Email Hosting Included</li>
+              <li>Fee is all-inclusive</li>
+              <li>SEO Tools</li>
+              <li>Ongoing content management and updates</li>
+              <li>Community Locator</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="container">
+      {% include 'widgets/inlineContact.twig' %}
+    </div>
+  </div>
+
+  {% include 'artisanal/featured.twig' %}
+{% endblock %}

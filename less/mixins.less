@@ -8,3 +8,22 @@
     }
   }
 }
+
+
+.productize {
+  .productize-property(color);
+  .productize-property(color, ~'a:link');
+  .productize-property(color, ~'a:visited');
+  .productize-property(color, ~'a:hover');
+  .productize-property(border-color);
+}
+
+.productize-property(@property, @selector: ~'') {
+  .product-none & @{selector} {
+    @{property}: @bp-grey;
+  }
+
+  .product-artisanal & @{selector} {
+    @{property}: @bp-red;
+  }
+}

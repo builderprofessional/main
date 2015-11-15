@@ -1,5 +1,5 @@
 <div class="productCallout washable {{ productClass }}">
-  <a href="#">
+  <a {% if target %}target="{{ target }}"{% endif %} href="{{ href }}">
     <div class="image">{{ imageContent }}</div>
 
     <div class="title">
