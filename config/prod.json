@@ -35,5 +35,7 @@
       "label": "Sales: ",
       "value": "sales@builderprofessional.com"
     }
-  ]
+  ],
+
+  "contactRequestEmail": "team@builderprofessional.com"
 }
