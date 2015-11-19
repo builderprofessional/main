@@ -1,11 +1,12 @@
 {
   "stripePublicKey": "pk_live_otKnB1NK00ezSYjNXdrJ6OCW",
+  "stripeSecretKey": "sk_live_pVcmHVVsIn4SDYpvpRgqc5PC",
 
   "database": {
-    "dbhost": "",
-    "dbname": "",
-    "dbuser": "",
-    "dbpass": ""
+    "dbhost": "localhost",
+    "dbname": "builderpro",
+    "dbuser": "builderpro",
+    "dbpass": "builderpro"
   },
 
   "socialMedia": {

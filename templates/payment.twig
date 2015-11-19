@@ -1,0 +1,556 @@
+{% extends "base.twig" %}
+
+{% block mainContent %}
+  {% set pageTitle = 'Confirm Your Signup for ' ~ extra.plan.name  %}
+
+  <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+  <script type="text/javascript">
+    function stripeResponseHandler(status, response) {
+      var $form = $('#payment-form');
+
+      if (response.error) {
+        // Show the errors on the form
+        $form.find('.payment-errors').text(response.error.message);
+        $form.find('.payment-errors').show();
+        $form.find('button').prop('disabled', false);
+      } else {
+        // response contains id and card, which contains additional card details
+        var token = response.id;
+        // Insert the token into the form so it gets submitted to the server
+        $form.append($('<input type="hidden" name="StripeToken" />').val(token));
+        // and submit
+        $form.get(0).submit();
+      }
+    };
+    function setBillingZip(el)
+    {
+      var thisel = $('#PostalCode');
+      var billzip = $('#BillingZip');
+      billzip.val(thisel.val());
+      var add = $('#Address1');
+      var billadd = $('#BillingAddress');
+      billadd.val(add.val());
+      var city = $('#City');
+      var billcit = $('#BillingCity');
+      billcit.val(city.val());
+      var state = $('#State');
+      var billstate = $('#BillingState');
+      billstate.val(state.val());
+    }
+    function setCardName(el)
+    {
+      var fname = $('#FirstName');
+      var lname = $('#LastName');
+      var cname = $('#CardHName');
+      cname.val(fname.val()+' '+lname.val());
+    }
+    // This identifies your website in the createToken call below
+    Stripe.setPublishableKey('{{ config.stripePublicKey }}');
+    jQuery(function($) {
+      $('#payment-form').submit(function(event) {
+        var $form = $(this);
+        if ( ! $('#AgreedToTerms').is(':checked') )
+        {
+          $form.find('.payment-errors').text('You must agree to the terms of the agreement to continue.');
+          $form.find('.payment-errors').show();
+          return false;
+        }
+
+        // Disable the submit button to prevent repeated clicks
+        $form.find('button').prop('disabled', true);
+
+        Stripe.card.createToken($form, stripeResponseHandler);
+
+        // Prevent the form from submitting with the default action
+        return false;
+      });
+    });
+
+  </script>
+
+
+  <div class="container">
+    <div class="row">
+      <form action="/processPayment.php" role="form" method="POST" name="payment-form" id="payment-form">
+
+          <div class="container">
+            <div class="row">
+              <div class="companyDetails">
+                <fieldset>
+                  <legend>Company Details</legend>
+
+                  <div class="form-group">
+                    <label for="CompanyName">
+                      Company/Builder Name
+                    </label>
+                    <input class="form-control" type="text" name="CompanyName" id="CompanyName" value="{% if extra.postedData.CompanyName is defined %}{{ CompanyName }}{% endif %}" placeholder="Enter your Company name here" onchange="$('#CompanySpan').html($(this).val());">
+                  </div>
+                  <div class="form-group">
+                    <label for="FirstName">
+                      Cardholder First Name
+                    </label>
+                    <input type="text" name="FirstName" id="FirstName" value="{% if extra.postedData.FirstName is defined %}{{ FirstName }}{% endif %}" placeholder="Enter your First name here" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label for="LastName">
+                      Last Name
+                    </label>
+                    <input type="text" name="LastName" id="LastName" value="{% if extra.postedData.LastName is defined %}{{ LastName }}{% endif %}" placeholder="Enter your Last name here" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="form-group col-xs-6">
+                        <label for="City">City</label>
+                        <input type="text" name="City" id="City" value="{% if extra.postedData.City is defined %}{{ City }}{% endif %}" placeholder="City" class="form-control">
+                      </div>
+                      <div class="form-group col-xs-2">
+                        <label for="State">State</label>
+                        <input type="text" name="State" id="State" value="{% if extra.postedData.State is defined %}{{ State }}{% endif %}" placeholder="State" class="form-control">
+                      </div>
+                      <div class="form-group col-xs-4">
+                        <label for="PostalCode">Zip</label>
+                        <input type="text" name="PostalCode" id="PostalCode" value="{% if extra.postedData.PostalCode is defined %}{{ PostalCode }}{% endif %}" placeholder="Zip" class="form-control" onchange="setBillingZip(this)">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="Phone">
+                      Phone
+                    </label>
+                    <input type="text" name="Phone" id="Phone" value="{% if extra.postedData.Phone is defined %}{{ Phone }}{% endif %}" placeholder="Phone" class="form-control">
+                  </div>
+                  <div class="form-group">
+                    <label for="Email">
+                      Email
+                    </label>
+                    <input type="text" name="Email" id="Email" value="{% if extra.postedData.Email is defined %}{{ Email }}{% endif %}" placeholder="Email" class="form-control">
+                  </div>
+                </fieldset>
+                {% if extra.postedData.PostalCode is defined and extra.postedData.PostalCode is not empty %}
+                  <script type="text/javascript">
+                    setBillingZip('test');
+                    $('#CompanySpan').html($('#CompanyName').val());
+                  </script>
+                {% endif %}
+
+                <fieldset>
+                  <legend>Payment Details</legend>
+                  <div class="payment-errors alert alert-danger alert-dismissable" style="{% if extra.errorMessage is empty %}display:none;{% endif %}">{{ extra.errorMessage }}</div>
+
+                  <div class="form-group">
+                    <label for="Credit Card Number">
+                      Credit Card Number
+                    </label>
+                    <input type="text" data-stripe="number" id="CreditCardNumber" placeholder="e.g. 41111111111111111" class="form-control">
+                  </div>
+
+                  <div class="form-group">
+                    <div class="row">
+                      <div class="form-group col-xs-6">
+                        <label for="CVV">
+                          CVV/CVC
+                        </label>
+                        <input type="text" data-stripe="cvc" id="CVV" placeholder="3 digit number from back of card" class="form-control">
+                      </div>
+                      <div class="form-group col-xs-3">
+                        <label for="MONTH">
+                          Exp Month
+                        </label>
+                        <input type="text" data-stripe="exp-month" id="MONTH" placeholder="2-digit month" class="form-control">
+                      </div>
+                      <div class="form-group col-xs-3">
+                        <label for="YEAR">Exp Year</label>
+                        <input type="text" data-stripe="exp-year" id="YEAR" placeholder="4-digit year" class="form-control">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="BillingZip">
+                      Billing Zipcode
+                    </label>
+                    <input type="text" data-stripe="address_zip" id="BillingZip" placeholder="Correct Billing Zipcode" class="form-control">
+                    <input type="hidden" data-stripe="name" id="CardHName">
+                    <input type="hidden" data-stripe="address_line1" id="BillingAddress">
+                    <input type="hidden" data-stripe="address_city" id="BillingCity">
+                    <input type="hidden" data-stripe="address_state" id="BillingState">
+                    <input type="hidden" name="PlanId" id="PlanId" value="{{ extra.plan.id }}">
+                  </div>
+                </fieldset>
+
+                <div class="form-group">
+                  <fieldset>
+                    <legend>Agreement</legend>
+                    <label>
+                      <input type="checkbox" name="AgreedToTerms" id="AgreedToTerms"> I have the authority to enter into agreements on behalf of
+                      <span id="CompanySpan">My Company</span> and I do so agree to the <a style="cursor:pointer;text-decoration:underline;color:blue;" id="terms">terms of this agreement.</a>
+                    </label>
+                    <script type="text/javascript">
+                      $('#terms').click(function(){
+                        $('#termsblock').toggle();
+
+                      })
+                    </script>
+                    {# Terms for artisanal sites #}
+                    <ul id="termsblock" style="display:none;">
+                      {% if extra.plan.key_name == "INVOICE" %}
+                        <li> Client agrees that they are paying for services rendered as invoiced in the associated invoice.</li>
+                      {% endif %}
+                      {% if extra.plan.key_name != "INVOICE" %}
+                        <li> Services will be provided by Builder Professional Technology, LLC as described in this agreement.</li>
+                        <li> Payments shall be made by the client to Builder Professional Technology, LLC, Duncanville, TX 75137.</li>
+                        <li> Client agrees to pay Builder Professional the amounts indicated in this proposal including any
+                          recurring fees. Client is providing a credit card that will be charged automatically every month for said
+                          recurring fees.</li>
+                        <li> In the case of a transaction being rejected, Client understands that Builder Professional may at its
+                          discretion attempt to process the charge again within 30 days, and agree to an additional $20.00 charge for
+                          each attempt rejected which will be initiated as a separate transaction from the authorized recurring
+                          payment. Client shall pay all costs of collection, including without limitation, reasonable attorney fees and
+                          agrees that in the case of client's failure to pay for services when due, Builder Professional may at its
+                          discretion treat such failure as a material breach of Contract and may cancel the contract and/or seek legal
+                          remedies.</li>
+                        <li> Client certifies that client is an authorized user of the credit card provided and that client and its officers
+                          will not dispute these scheduled transactions with Client's bank or credit card company; so long as the
+                          transactions correspond to the terms indicated in this authorization.</li>
+                      {% endif %}
+                      {% if extra.plan.key_name == "INVOICE" %}
+                        <li> Client certifies that client is an authorized user of the credit card provided and that client and its officers
+                          will not dispute this transaction with Client's bank or credit card company; so long as the
+                          transaction corresponds to the terms indicated in this authorization.</li>
+                      {% endif %}
+                      {% if extra.plan.key_name == 'ARTISANAL' %}
+                        <li> Client further authorizes Builder Professional to charge this credit card or any updated credit card a
+                          cancellation fee of two (2) times the monthly amount if the client cancels service before the end of the first
+                          12 months of service.</li>
+                        <li> Client understands that if service is canceled before the end of the first 12 months of service, all website design will remain
+                          the intellectual property of Builder Professional and will not be released.  After the first 12 months if service is cancelled,
+                          the full website will be provided to the client as a static set of web pages suitable for display on any hosting provider but
+                          without the content management which is proprietary to Builder Professional.
+                        </li>
+                        <li> This agreement may be terminated after twelve (12) months by either party upon thirty (30) days prior
+                          written notice to the other party. An email notice by one party will suffice.</li>
+                      {% endif %}
+                      {% if extra.plan.key_name != "INVOICE" %}
+                        <li> This is the entire agreement of the parties and there are no other promises or conditions in any other
+                          agreement concerning the subject matter of this contract. This contract supersedes any prior written or oral
+                          agreement between the parties.</li>
+                      {% endif %}
+                    </ul>
+                    {# Terms for non-artisanal sites #}
+                  </fieldset>
+                  <fieldset>
+                    <button type="submit">Authorize Payment</button>
+                  </fieldset>
+                </div>
+
+              </div>
+
+              <div class="paymentInformation">
+                {% if extra.plan.key_name == 'INVOICE' %}
+                  <fieldset>
+                    <legend>Your Payment Information</legend>
+
+                    <div class="form-group">
+                      <label for="InvoiceNumber">
+                        Invoice #
+                      </label>
+                      <input type="text" name="InvoiceNumber" id="InvoiceNumber" value="" placeholder="Invoice # of the Invoice you are Paying" class="form-control">
+                    </div>
+                    <div class="form-group">
+                      <label for="Amount">
+                        Amount
+                      </label>
+                      <input type="text" name="Amount" id="Amount" value="" placeholder="Amount You are Paying" class="form-control Amount">
+                    </div>
+                  </fieldset>
+                {% else %}
+
+                  <fieldset>
+                    <legend>Your Plan</legend>
+                    <h2>{{ extra.plan.name }}</h2>
+                    <table class="payment_table table table-bordered table-hover table-condensed">
+                      {% if extra.plan.one_time_fee > 0 %}
+                        <thead>
+                        <tr>
+                          <th colspan="2">
+                            You will pay today:
+                          </th>
+                        </tr>
+                        </thead>
+                        <tr {% if extra.plan.one_time_tax <=0 %}class="success"{% endif %}>
+                          <th>Setup Fee</th>
+                          <td class="text-right currency">{{ extra.plan.one_time_fee|number_format(2) }}</td>
+                        </tr>
+                        {% if extra.plan.one_time_tax > 0 %}
+                          <tr>
+                            <th>Tax</th>
+                            <td class="text-right currency">{{ extra.plan.one_time_tax|number_format(2) }}</td>
+                          </tr>
+                          <tr class="success">
+                            <th>Total</th>
+                            <td class="text-right currency">{{ extra.plan.one_time_total|number_format(2) }}</td>
+                          </tr>
+                        {% endif %}
+                      {% elseif extra.plan.key_name != 'HOSTING' %}
+                        <thead>
+                        <tr>
+                          <th colspan="2">You will not be charged at this time</th>
+                        </tr>
+                        </thead>
+                      {% endif %}
+                      {% if extra.plan.recurring_fee > 0 %}
+                        <thead>
+                        <tr>
+                          <th colspan="2">
+                            Your recurring {% if extra.plan.key_name == 'ARTISANAL' %}monthly{% else %}annual{% endif %} fee will be:
+                          </th>
+                        </tr>
+                        </thead>
+                        <tr>
+                          <th>Recurring Fee</th>
+                          <td class="text-right currency">{{ extra.plan.recurring_fee|number_format(2) }}</td>
+                        </tr>
+                        {% if extra.plan.recurring_tax > 0 %}
+                          <tr>
+                            <th>Tax</th>
+                            <td class="text-right currency">{{ extra.plan.recurring_tax|number_format(2) }}</td>
+                          </tr>
+                          <tr class="{% if extra.plan.one_time_fee <=0 %}success{% endif %}">
+                            <th>Total</th>
+                            <td class="text-right currency">{{ extra.plan.recurring_total|number_format(2) }}</td>
+                          </tr>
+                        {% endif %}
+                      {% endif %}
+                    </table>
+                  </fieldset>
+
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+
+          {#<div class="span6">#}
+            {#<fieldset>#}
+              {#<legend>Company Details</legend>#}
+              {#<div class="span12">#}
+                {#<label for="CompanyName">#}
+                  {#Company/Builder Name#}
+                {#</label>#}
+                {#<input type="text" name="CompanyName" id="CompanyName" value="{% if extra.postedData.CompanyName is defined %}{{ CompanyName }}{% endif %}" placeholder="Enter your Company name here" onchange="$('#CompanySpan').html($(this).val());">#}
+              {#</div>#}
+              {#<div class="span2">#}
+                {#<label for="FirstName">#}
+                  {#Cardholder First Name#}
+                {#</label>#}
+                {#<input type="text" name="FirstName" id="FirstName" value="{% if extra.postedData.FirstName is defined %}{{ FirstName }}{% endif %}" placeholder="Enter your First name here" class="span2">#}
+              {#</div>#}
+              {#<div class="span2">#}
+                {#<label for="LastName">#}
+                  {#Last Name#}
+                {#</label>#}
+                {#<input type="text" name="LastName" id="LastName" value="{% if extra.postedData.LastName is defined %}{{ LastName }}{% endif %}" placeholder="Enter your Last name here" class="span2">#}
+              {#</div>#}
+              {#<div class="span12">#}
+                {#<label for="LastName">#}
+                  {#Address#}
+                {#</label>#}
+                {#<input type="text" name="Address1" id="Address1" value="{% if extra.postedData.Address1 is defined %}{{ Address1 }}{% endif %}" placeholder="Enter your street address">#}
+              {#</div>#}
+              {#<div class="span2">#}
+                {#<label for="City">#}
+                  {#City#}
+                {#</label>#}
+                {#<input type="text" name="City" id="City" value="{% if extra.postedData.City is defined %}{{ City }}{% endif %}" placeholder="City" class="span2">#}
+              {#</div>#}
+              {#<div class="span1">#}
+                {#<label for="State">#}
+                  {#State#}
+                {#</label>#}
+                {#<input type="text" name="State" id="State" value="{% if extra.postedData.State is defined %}{{ State }}{% endif %}" placeholder="State" class="span1">#}
+              {#</div>#}
+              {#<div class="span2">#}
+                {#<label for="PostalCode">#}
+                  {#PostalCode#}
+                {#</label>#}
+                {#<input type="text" name="PostalCode" id="PostalCode" value="{% if extra.postedData.PostalCode is defined %}{{ PostalCode }}{% endif %}" placeholder="Zip" class="span2" onchange="setBillingZip(this)">#}
+              {#</div>#}
+              {#<div class="span12">#}
+                {#<label for="Phone">#}
+                  {#Phone#}
+                {#</label>#}
+                {#<input type="text" name="Phone" id="Phone" value="{% if extra.postedData.Phone is defined %}{{ Phone }}{% endif %}" placeholder="Phone" class="span4">#}
+              {#</div>#}
+              {#<div class="span12">#}
+                {#<label for="Email">#}
+                  {#Email#}
+                {#</label>#}
+                {#<input type="text" name="Email" id="Email" value="{% if extra.postedData.Email is defined %}{{ Email }}{% endif %}" placeholder="Email" class="span4">#}
+              {#</div>#}
+            {#</fieldset>#}
+            {#{% if extra.postedData.PostalCode is defined and extra.postedData.PostalCode is not empty %}#}
+              {#<script type="text/javascript">#}
+                {#setBillingZip('test');#}
+                {#$('#CompanySpan').html($('#CompanyName').val());#}
+                {#console.log('setting stuff');#}
+              {#</script>#}
+            {#{% endif %}#}
+          {#</div>#}
+          {#<div class="span6 ">#}
+            {#<fieldset>#}
+              {#<legend>Your Plan</legend>#}
+              {#<h2>{{ extra.plan.name }}</h2>#}
+              {#<table class="payment_table table table-bordered table-hover table-condensed">#}
+                {#{% if extra.plan.one_time_fee > 0 %}#}
+                  {#<thead>#}
+                  {#<tr>#}
+                    {#<th colspan="2">#}
+                      {#You will pay today:#}
+                    {#</th>#}
+                  {#</tr>#}
+                  {#</thead>#}
+                  {#<tr {% if extra.plan.one_time_tax <=0 %}class="success"{% endif %}>#}
+                    {#<th>Setup Fee</th>#}
+                    {#<td class="text-right currency">{{ extra.plan.one_time_fee|number_format(2) }}</td>#}
+                  {#</tr>#}
+                  {#{% if extra.plan.one_time_tax > 0 %}#}
+                    {#<tr>#}
+                      {#<th>Tax</th>#}
+                      {#<td class="text-right currency">{{ extra.plan.one_time_tax|number_format(2) }}</td>#}
+                    {#</tr>#}
+                    {#<tr class="success">#}
+                      {#<th>Total</th>#}
+                      {#<td class="text-right currency">{{ extra.plan.one_time_total|number_format(2) }}</td>#}
+                    {#</tr>#}
+                  {#{% endif %}#}
+                {#{% else %}#}
+                  {#<thead>#}
+                  {#<tr>#}
+                    {#<th colspan="2">You will not be charged at this time</th>#}
+                  {#</tr>#}
+                  {#</thead>#}
+                {#{% endif %}#}
+                {#{% if extra.plan.recurring_fee > 0 %}#}
+                  {#<thead>#}
+                  {#<tr>#}
+                    {#<th colspan="2">#}
+                      {#Your recurring {% if extra.plan.key_name == 'ARTISANAL' %}monthly{% else %}annual{% endif %} fee will be:#}
+                    {#</th>#}
+                  {#</tr>#}
+                  {#</thead>#}
+                  {#<tr>#}
+                    {#<th>Recurring Fee</th>#}
+                    {#<td class="text-right currency">{{ extra.plan.recurring_fee|number_format(2) }}</td>#}
+                  {#</tr>#}
+                  {#{% if extra.plan.recurring_tax > 0 %}#}
+                    {#<tr>#}
+                      {#<th>Tax</th>#}
+                      {#<td class="text-right currency">{{ extra.plan.recurring_tax|number_format(2) }}</td>#}
+                    {#</tr>#}
+                    {#<tr class="{% if extra.plan.one_time_fee <=0 %}success{% endif %}">#}
+                      {#<th>Total</th>#}
+                      {#<td class="text-right currency">{{ extra.plan.recurring_total|number_format(2) }}</td>#}
+                    {#</tr>#}
+                  {#{% endif %}#}
+                {#{% endif %}#}
+              {#</table>#}
+            {#</fieldset>#}
+          {#</div>#}
+          {#<div class="span12">#}
+            {#<fieldset>#}
+              {#<legend>Payment Details</legend>#}
+              {#<div class="payment-errors alert alert-danger alert-dismissable" style="{% if extra.errorMessage is empty %}display:none;{% endif %}">{{ extra.errorMessage }}</div>#}
+              {#<div class="span12">#}
+                {#<label for="Credit Card Number">#}
+                  {#Credit Card Number#}
+                {#</label>#}
+                {#<input type="text" data-stripe="number" id="CreditCardNumber" placeholder="e.g. 41111111111111111" class="span3">#}
+              {#</div>#}
+              {#<div class="span2">#}
+                {#<label for="CVV">#}
+                  {#CVV/CVC#}
+                {#</label>#}
+                {#<input type="text" data-stripe="cvc" id="CVV" placeholder="3 digit number from back of card" class="span2">#}
+              {#</div>#}
+              {#<div class="span2">#}
+                {#<label for="YEAR">#}
+                  {#Expiration (MM/YYYY)#}
+                {#</label>#}
+                {#<input type="text" data-stripe="exp-month" id="MONTH" placeholder="2-digit month" class="span1">#}
+                {#<span> / </span>#}
+                {#<input type="text" data-stripe="exp-year" id="YEAR" placeholder="4-digit year" class="span1">#}
+              {#</div>#}
+              {#<div class="span12">#}
+                {#<label for="BillingZip">#}
+                  {#Billing Zipcode#}
+                {#</label>#}
+                {#<input type="text" data-stripe="address_zip" id="BillingZip" placeholder="Correct Billing Zipcode" class="span2">#}
+                {#<input type="hidden" data-stripe="name" id="CardHName">#}
+                {#<input type="hidden" data-stripe="address_line1" id="BillingAddress">#}
+                {#<input type="hidden" data-stripe="address_city" id="BillingCity">#}
+                {#<input type="hidden" data-stripe="address_state" id="BillingState">#}
+                {#<input type="hidden" name="PlanId" id="PlanId" value="{{ extra.plan.id }}">#}
+              {#</div>#}
+            {#</fieldset>#}
+          {#</div>#}
+          {#<div class="span12">#}
+            {#<fieldset>#}
+              {#<legend>Agreement</legend>#}
+              {#<label>#}
+                {#<input type="checkbox" name="AgreedToTerms" id="AgreedToTerms"> I have the authority to enter into agreements on behalf of#}
+                {#<span id="CompanySpan">My Company</span> and I do so agree to the <a style="cursor:pointer;text-decoration:underline;color:blue;" id="terms">terms of this agreement.</a>#}
+              {#</label>#}
+              {#<script type="text/javascript">#}
+                {#$('#terms').click(function(){#}
+                  {#$('#termsblock').toggle();#}
+
+                {#})#}
+              {#</script>#}
+              {#&#123;&#35; Terms for artisanal sites &#35;&#125;#}
+              {#<ul id="termsblock" style="display:none;">#}
+                {#<li> Services will be provided by Builder Professional Technology, LLC as described in this agreement.</li>#}
+                {#<li> Payments shall be made by the client to Builder Professional Technology, LLC, Duncanville, TX 75137.</li>#}
+                {#<li> Client agrees to pay Builder Professional the amounts indicated in this proposal including any#}
+                  {#recurring fees. Client is providing a credit card that will be charged automatically every month for said#}
+                  {#recurring fees.</li>#}
+                {#<li> In the case of a transaction being rejected, Client understands that Builder Professional may at its#}
+                  {#discretion attempt to process the charge again within 30 days, and agree to an additional $20.00 charge for#}
+                  {#each attempt rejected which will be initiated as a separate transaction from the authorized recurring#}
+                  {#payment. Client shall pay all costs of collection, including without limitation, reasonable attorney fees and#}
+                  {#agrees that in the case of client's failure to pay for services when due, Builder Professional may at its#}
+                  {#discretion treat such failure as a material breach of Contract and may cancel the contract and/or seek legal#}
+                  {#remedies.</li>#}
+                {#<li> Client certifies that client is an authorized user of the credit card provided and that client and its officers#}
+                  {#will not dispute these scheduled transactions with Client's bank or credit card company; so long as the#}
+                  {#transactions correspond to the terms indicated in this authorization.</li>#}
+                {#{% if extra.plan.key_name == 'ARTISANAL' %}#}
+                  {#<li> Client further authorizes Builder Professional to charge this credit card or any updated credit card a#}
+                    {#cancellation fee of two (2) times the monthly amount if the client cancels service before the end of the first#}
+                    {#12 months of service.</li>#}
+                  {#<li> Client understands that if service is canceled before the end of the first 12 months of service, all website design will remain#}
+                    {#the intellectual property of Builder Professional and will not be released.  After the first 12 months if service is cancelled,#}
+                    {#the full website will be provided to the client as a static set of web pages suitable for display on any hosting provider but#}
+                    {#without the content management which is proprietary to Builder Professional.#}
+                  {#</li>#}
+                {#{% endif %}#}
+                {#<li> This agreement may be terminated after twelve (12) months by either party upon thirty (30) days prior#}
+                  {#written notice to the other party. An email notice by one party will suffice.</li>#}
+                {#<li> This is the entire agreement of the parties and there are no other promises or conditions in any other#}
+                  {#agreement concerning the subject matter of this contract. This contract supersedes any prior written or oral#}
+                  {#agreement between the parties.</li>#}
+              {#</ul>#}
+              {#&#123;&#35; Terms for non-artisanal sites &#35;&#125;#}
+            {#</fieldset>#}
+            {#<fieldset>#}
+              {#<button type="submit">Submit Payment</button>#}
+            {#</fieldset>#}
+          {#</div>#}
+
+
+      </form>
+      <div>&nbsp;</div>
+    </div>
+  </div>
+
+
+{% endblock %}

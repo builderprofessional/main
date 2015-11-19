@@ -1,9 +1,10 @@
 {
   "stripePublicKey": "pk_test_3fWLMj6WO0AqSi60YqmpX6GI",
+  "stripeSecretKey": "sk_test_o15CGp92sCJj1erqVqENYysB",
 
   "database": {
     "dbhost": "localhost",
-    "dbname": "builderpro",
+    "dbname": "builderpro_stage",
     "dbuser": "builderpro",
     "dbpass": "builderpro"
   },
