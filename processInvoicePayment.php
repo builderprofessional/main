@@ -47,7 +47,7 @@ try {
 }
 
 if (!$success) {
-  start_page('payment.twig', ['plan' => $plan, 'errorMessage' => $errorMessage, 'postedData' => $_REQUEST]);
+  startPage('payment.twig', ['plan' => $plan, 'errorMessage' => $errorMessage, 'postedData' => $_REQUEST]);
   exit;
 }
 
@@ -62,4 +62,4 @@ if ($_SERVER['ENVIRONMENT_NAME'] == 'stage')
 }
 
 mail('billing@builderprofessional.com', $subject, $emailMessage, "From: billing@builderprofessional.com\r\n");
-start_page('invoice_complete.twig', ['plan' => $plan]);
+startPage('processPayment.twig', ['plan' => $plan]);
