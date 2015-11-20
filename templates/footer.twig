@@ -14,7 +14,14 @@
 
       <ul>
       {% for contactMethod in config.contactMethods %}
-        <li class="{{ contactMethod.cssClass }}">{{ contactMethod.label }}<span>{{ contactMethod.value }}</span></li>
+        <li class="{{ contactMethod.cssClass }}">
+          {{ contactMethod.label }}
+          {% if contactMethod.cssClass == 'email' %}
+          <span><a href="mailto:{{ contactMethod.value }}">{{ contactMethod.value }}</a></span>
+          {% else %}
+            <span>{{ contactMethod.value }}</span>
+          {% endif %}
+        </li>
       {% endfor %}
       </ul>
     </div>
