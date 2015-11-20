@@ -71,7 +71,7 @@
 
   <div class="container">
     <div class="row">
-      <form action="/processPayment.php" role="form" method="POST" name="payment-form" id="payment-form">
+      <form action="{% if extra.plan.key_name == 'INVOICE' %}/processInvoicePayment.php{% else %}/processPayment.php{% endif %}" role="form" method="POST" name="payment-form" id="payment-form">
 
           <div class="container">
             <div class="row">
