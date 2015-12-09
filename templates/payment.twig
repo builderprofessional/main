@@ -56,6 +56,24 @@
           return false;
         }
 
+        if ($('#CompanyName').val() == "") {
+          $form.find('.company-info-errors').text('You must enter a company name.');
+          $form.find('.company-info-errors').show();
+          return false;
+        }
+
+        if ($('#FirstName').val() == "") {
+          $form.find('.company-info-errors').text("You must enter the cardholder's first name.");
+          $form.find('.company-info-errors').show();
+          return false;
+        }
+
+        if ($('#LastName').val() == "") {
+          $form.find('.company-info-errors').text("You must enter the cardholder's last name.");
+          $form.find('.company-info-errors').show();
+          return false;
+        }
+
         // Disable the submit button to prevent repeated clicks
         $form.find('button').prop('disabled', true);
 
@@ -78,6 +96,8 @@
               <div class="companyDetails">
                 <fieldset>
                   <legend>Company Details</legend>
+
+                  <div class="company-info-errors alert alert-danger alert-dismissable" style="display:none;"></div>
 
                   <div class="form-group">
                     <label for="CompanyName">
