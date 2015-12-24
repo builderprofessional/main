@@ -49,6 +49,9 @@
     jQuery(function($) {
       $('#payment-form').submit(function(event) {
         var $form = $(this);
+
+        $form.find('.plan-errors').hide();
+
         if ( ! $('#AgreedToTerms').is(':checked') )
         {
           $form.find('.payment-errors').text('You must agree to the terms of the agreement to continue.');
@@ -73,6 +76,16 @@
           $form.find('.company-info-errors').show();
           return false;
         }
+
+        {% if extra.plan.key_name == 'INVOICE' %}
+        var invoiceAmount = $('#Amount').val();
+        if (invoiceAmount == "" || invoiceAmount <= 0) {
+          $form.find('.plan-errors').text("You must enter an invoice amount");
+          $form.find('.plan-errors').show();
+          window.scrollTo(0, 0);
+          return false;
+        }
+        {% endif %}
 
         // Disable the submit button to prevent repeated clicks
         $form.find('button').prop('disabled', true);
@@ -269,6 +282,7 @@
                 {% if extra.plan.key_name == 'INVOICE' %}
                   <fieldset>
                     <legend>Your Payment Information</legend>
+                    <div class="plan-errors alert alert-danger alert-dismissable" style="display: none"></div>
 
                     <div class="form-group">
                       <label for="InvoiceNumber">
